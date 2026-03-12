@@ -1,39 +1,27 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
-
-
-df = pd.read_csv('ufo_sightings.csv')
-
-print(df.head())
-print(df.info())
-
-df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
-df['year'] = df['datetime'].dt.year
-df['month'] = df['datetime'].dt.month
-df['hour'] = df['datetime'].dt.hour
+import folium
 
 # df['shape'] = df['shape'].str.lower().str.strip()
 # df['city'] = df['city'].str.lower().str.strip()
 # df['country'] = df['country'].str.lower().str.strip()
 
-year_counts = df['year'].value_counts().sort_index()
-plt.figure()
-year_counts.plot()
+df = pd.read_csv('ufo_sightings.csv')
 
-plt.title('UFO Sightings by Year')
-plt.xlabel('Year')
-plt.ylabel('Number of Sightings')
-plt.grid()
-plt.show()
+df["latitude"] = pd.to_numeric(df["latitude"], errors="coerce")
+df["longitude"] = pd.to_numeric(df["longitude"], errors="coerce")
+# Remove rows with invalid coordinates
+df = df.dropna(subset=["latitude", "longitude"])
 
-fig=px.scatter_geo(
-    df,
-    lat='latitude',
-    lon='longitude',
-    hover_name='city',
-    hover_data=['datetime', 'shape'],
-    color='country',
-    title='UFO Sightings Worldwide'
-)
-fig.show()
+df = df.sample(5000)
+
+ufo_map = folium.Map(location=[20, 0], zoom_start=2)
+for index, row in df.iterrows():
+    folium.CircleMarker(
+        location=[row["latitude"], row["longitude"]],
+        radius=2,
+        popup=row["city"],
+        color="red"
+    ).add_to(ufo_map)
+ufo_map.save("ufo_map.html")
