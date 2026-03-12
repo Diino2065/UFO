@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
+
 
 df = pd.read_csv('ufo_sightings.csv')
 
@@ -24,3 +26,14 @@ plt.xlabel('Year')
 plt.ylabel('Number of Sightings')
 plt.grid()
 plt.show()
+
+fig=px.scatter_geo(
+    df,
+    lat='latitude',
+    lon='longitude',
+    hover_name='city',
+    hover_data=['datetime', 'shape'],
+    color='country',
+    title='UFO Sightings Worldwide'
+)
+fig.show()
